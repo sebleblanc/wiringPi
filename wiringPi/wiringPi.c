@@ -1807,8 +1807,13 @@ static void *interruptHandler (void *arg)
   pinPass = -1 ;
 
   for (;;)
-    if (waitForInterrupt (myPin, -1) > 0)
-      isrFunctions [myPin] () ;
+    if (waitForInterrupt (myPin, -1) > 0) {
+      wpiISRCallback func;
+
+      func = (wpiISRCallback)isrFunctions [myPin];
+
+      func (arg, myPin);
+    }
 
   return NULL ;
 }
@@ -1822,7 +1827,7 @@ static void *interruptHandler (void *arg)
  *********************************************************************************
  */
 
-int wiringPiISR (int pin, int mode, void (*function)(void))
+int wiringPiISR (int pin, int mode, wpiISRCallback function, void *data)
 {
   pthread_t threadId ;
   const char *modeS ;
@@ -1904,7 +1909,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
 
   pthread_mutex_lock (&pinMutex) ;
     pinPass = pin ;
-    pthread_create (&threadId, NULL, interruptHandler, NULL) ;
+    pthread_create (&threadId, NULL, interruptHandler, data) ;
     while (pinPass != -1)
       delay (1) ;
   pthread_mutex_unlock (&pinMutex) ;

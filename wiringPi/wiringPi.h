@@ -207,8 +207,10 @@ extern          void gpioClockSet        (int pin, int freq) ;
 // Interrupts
 //	(Also Pi hardware specific)
 
+
+typedef void (*wpiISRCallback)(void *, int);
 extern int  waitForInterrupt    (int pin, int mS) ;
-extern int  wiringPiISR         (int pin, int mode, void (*function)(void)) ;
+extern int  wiringPiISR         (int pin, int mode, wpiISRCallback func, void *data) ;
 
 // Threads
 
